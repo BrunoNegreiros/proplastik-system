@@ -54,17 +54,18 @@ class ReservationItem(SQLModel, table=True):
 
 
 # -------------------------------------------------------------
-# CONFIGURAÇÃO DE CONEXÃO (SQLITE LOCAL OU POSTGRESQL RENDER)
+# CONFIGURAÇÃO DE CONEXÃO (SQLITE LOCAL OU POSTGRESQL NUVEM)
 # -------------------------------------------------------------
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./proplastik.db")
 
-# Corrige prefixo caso o provedor de nuvem forneça postgres:// em vez de postgresql://
+# Corrige prefixo e força o uso do psycopg2 para evitar conflitos no Serverless
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+psycopg2://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, echo=False, connect_args=connect_args)
-
 
 def get_session():
     with Session(engine) as session:
