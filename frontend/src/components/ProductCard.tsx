@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Check } from 'lucide-react';
 
 export interface ItemData {
   id: number;
@@ -70,7 +69,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart }) =
 
         {/* Status de Estoque */}
         <p className="text-[11px] text-[#5D5656] mb-3">
-          Estoque em SV: <strong className="text-proplastik-dark">{item.remaining_units} un.</strong>
+          Estoque: <strong className="text-proplastik-dark">{item.remaining_units} un.</strong>
         </p>
       </div>
 
@@ -95,11 +94,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart }) =
         >
           {added ? (
             <>
-              <Check size={14} /> Reservado
+              Reservado
             </>
           ) : (
             <>
-              <ShoppingBag size={14} /> Reservar
+              Reservar
             </>
           )}
         </button>
