@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-proplastik-main: #D81717;
+  --color-proplastik-dark: #B01010;
+  --color-proplastik-deep: #5A0A10;
+  --color-proplastik-yellow: #FCDF67;
+  --color-proplastik-yellowBadge: #FEC605;
+  --font-sans: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FAFAFA;
+  color: #383838;
+}
