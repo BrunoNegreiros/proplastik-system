@@ -400,12 +400,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
 
                       <div className="flex md:flex-col justify-end gap-2 shrink-0">
-                        <button
-                          onClick={() => handleUpdateStatus(res.id, 'CONCLUIDA')}
-                          className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded transition"
-                        >
-                          <CheckCircle size={14} /> Confirmar Retirada
-                        </button>
+                        {res.status === 'CONCLUIDA' ? (
+                          <button
+                            onClick={() => handleUpdateStatus(res.id, 'AGUARDANDO_RETIRADA')}
+                            className="flex items-center justify-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold px-3 py-2 rounded transition"
+                          >
+                            <RefreshCw size={14} /> Desconfirmar Retirada
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleUpdateStatus(res.id, 'CONCLUIDA')}
+                            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-2 rounded transition"
+                          >
+                            <CheckCircle size={14} /> Confirmar Retirada
+                          </button>
+                        )}
                         <button
                           onClick={() => handleUpdateStatus(res.id, 'CANCELADA')}
                           className="flex items-center justify-center gap-1.5 bg-gray-200 hover:bg-red-100 hover:text-red-700 text-gray-700 text-xs font-bold px-3 py-2 rounded transition"

@@ -1,5 +1,5 @@
 import React, { type ReactNode } from 'react';
-import { Search, ShoppingBag, MapPin } from 'lucide-react';
+import { Search, ShoppingBag, MapPin, Phone } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -139,6 +139,12 @@ export const Layout: React.FC<LayoutProps> = ({
             </p>
             <p className="mb-1"><strong>Segunda a Sexta:</strong> 08h30 às 18h30</p>
             <p><strong>Sábado:</strong> 08h30 às 14h00</p>
+            <p className="flex items-start gap-1.5 pt-2 border-t border-gray-100">
+              <Phone size={15} className="text-proplastik-main shrink-0 mt-0.5" />
+              <span>
+                <strong>(13) 3569-6500</strong> — Esqueceu seu código ou tem alguma dúvida? Entre em contato conosco.
+              </span>
+            </p>
           </div>
 
           <div>
