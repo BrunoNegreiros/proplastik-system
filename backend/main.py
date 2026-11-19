@@ -316,32 +316,41 @@ def update_reservation_status(
     if not res:
         raise HTTPException(status_code=404, detail="Reserva não encontrada.")
 
-    if status_str == "CANCELADA":
-        # Busca todos os itens vinculados à reserva
-        res_items = session.exec(
-            select(ReservationItem).where(ReservationItem.reservation_id == res.id)
-        ).all()
+    try:
+        if status_str == "CANCELADA":
+            res_items = session.exec(
+                select(ReservationItem).where(ReservationItem.reservation_id == res.id)
+            ).all()
 
-        # Restaura o estoque apenas se ainda não estava cancelada
-        if res.status != "CANCELADA":
+            # 1. Restaura o estoque se ainda não estava cancelada
+            if res.status != "CANCELADA":
+                for ri in res_items:
+                    item = session.get(Item, ri.item_id)
+                    if item:
+                        item.remaining_units += ri.quantity
+                        session.add(item)
+
+            # 2. Deleta os itens filhos e força o envio ao banco antes de deletar o pai
             for ri in res_items:
-                item = session.get(Item, ri.item_id)
-                if item:
-                    item.remaining_units += ri.quantity
-                    session.add(item)
+                session.delete(ri)
+            session.flush()
 
-        # Deleta os itens filhos primeiro (por causa da chave estrangeira) e depois a reserva
-        for ri in res_items:
-            session.delete(ri)
+            # 3. Agora deleta a reserva com segurança
+            session.delete(res)
+            session.commit()
+            return {"message": "Reserva cancelada, estoque restaurado e registro excluído."}
 
-        session.delete(res)
+        res.status = status_str
+        session.add(res)
         session.commit()
-        return {"message": "Reserva cancelada, estoque restaurado e registro excluído."}
+        return {"message": f"Status da reserva atualizado para {status_str}."}
 
-    res.status = status_str
-    session.add(res)
-    session.commit()
-    return {"message": f"Status da reserva atualizado para {status_str}."}
+    except Exception as exc:
+        session.rollback()
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao atualizar reserva: {str(exc)}"
+        )
 
 
 # -------------------------------------------------------------
