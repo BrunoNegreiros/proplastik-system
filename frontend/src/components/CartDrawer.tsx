@@ -65,6 +65,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
       return;
     }
 
+    const phoneDigits = customerPhone.replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      setErrorMsg('Informe um WhatsApp válido com DDD (10 ou 11 dígitos).');
+      return;
+    }
+
     setLoading(true);
     setErrorMsg('');
 
@@ -237,9 +243,13 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                   <input
                     type="tel"
                     required
-                    placeholder="(13) 99999-9999"
+                    maxLength={11}
+                    placeholder="13999999999"
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    onChange={(e) => {
+                      const onlyNumbers = e.target.value.replace(/\D/g, '').slice(0, 11);
+                      setCustomerPhone(onlyNumbers);
+                    }}
                     className="w-full text-xs p-2 border border-[#D4D2D2] rounded focus:outline-none focus:border-proplastik-main"
                   />
                 </div>

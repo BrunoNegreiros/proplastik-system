@@ -156,6 +156,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       );
       if (res.ok) {
         reloadData();
+        onDataChanged();
       }
     } catch (err) {
       console.error('Erro ao atualizar status:', err);

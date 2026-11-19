@@ -1,4 +1,5 @@
 import os
+import re
 import random
 import string
 from datetime import datetime, timedelta, timezone
@@ -314,6 +315,29 @@ def update_reservation_status(
     res = session.get(Reservation, reservation_id)
     if not res:
         raise HTTPException(status_code=404, detail="Reserva não encontrada.")
+
+    if status_str == "CANCELADA":
+        # Busca todos os itens vinculados à reserva
+        res_items = session.exec(
+            select(ReservationItem).where(ReservationItem.reservation_id == res.id)
+        ).all()
+
+        # Restaura o estoque apenas se ainda não estava cancelada
+        if res.status != "CANCELADA":
+            for ri in res_items:
+                item = session.get(Item, ri.item_id)
+                if item:
+                    item.remaining_units += ri.quantity
+                    session.add(item)
+
+        # Deleta os itens filhos primeiro (por causa da chave estrangeira) e depois a reserva
+        for ri in res_items:
+            session.delete(ri)
+
+        session.delete(res)
+        session.commit()
+        return {"message": "Reserva cancelada, estoque restaurado e registro excluído."}
+
     res.status = status_str
     session.add(res)
     session.commit()
@@ -396,9 +420,6 @@ class ReservationResult(BaseModel):
     customer_name: str
     customer_phone: str
 
-
-import traceback
-
 @app.post("/api/public/reservations", response_model=ReservationResult)
 def create_reservation(
     payload: ReservationCreateInput,
@@ -406,6 +427,13 @@ def create_reservation(
 ):
     if not payload.items:
         raise HTTPException(status_code=400, detail="O carrinho está vazio.")
+
+    clean_phone = re.sub(r"\D", "", payload.customer_phone)
+    if len(clean_phone) not in (10, 11):
+        raise HTTPException(
+            status_code=400,
+            detail="WhatsApp inválido. Informe DDD + número (10 ou 11 dígitos)."
+        )
 
     try:
         # 1. Gera código único
